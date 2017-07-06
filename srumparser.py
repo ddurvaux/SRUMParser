@@ -12,7 +12,7 @@ import sys
 import argparse
 
 # Add path to pyesedb
-sys.path.append("C:\\Tools\\libesedb-20170121\\")
+sys.path.append("/Users/david/Workspace/git/libesedb-20170121")
 import pyesedb
 
 # --------------------------------------------------------------------------- #
@@ -21,16 +21,18 @@ import pyesedb
 	TEST
 """
 def test():
-	#print("TEST, libesedb version %s" % str(pyesedb.get_version()))
 
-	print pyesedb.methods
+    # Cygwin / Win location - "/cygdrive/c/Windows/System32/sru/SRUDB.dat"
+    test_file = "./test/SRUDB.dat"
 
-	# Open DB file
-	#esedb_file = pyesedb.file()
-	#esedb_file.open("/cygdrive/c/Windows/System32/sru/SRUDB.dat")
-	#esedb_file.close()
+    print("TEST, libesedb version %s" % str(pyesedb.get_version()))
 
-	return
+    # Open DB file
+    esedb_file = pyesedb.file()
+    esedb_file.open(test_file)
+    esedb_file.close()
+
+    return
 
 # --------------------------------------------------------------------------- #
 
