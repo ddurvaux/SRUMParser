@@ -17,6 +17,15 @@ import pyesedb
 
 # --------------------------------------------------------------------------- #
 
+__table_mapping = { # check values !!
+    "WIN_NET_DATA_USAGE", "{973F5D5C-1D90-4944-BE8E-24B94231A174}"
+    "ENERGY_USAGE", "{FEE4E14F-02A9-4550-B5CE-5FA2DA202E37}"
+    "WPN_SRUM", "{D10CA2FE-6FCF-4F6D-848E-B2E99266FA86}"
+    #"", "{D10CA2FE-6FCF-4F6D-848E-B2E99266FA89}"
+    #"", "{DA73FB89-2BEA-4DDC-86B8-6E048C6DA477}"
+    #"", "{DD6636C4-8929-4683-974E-22C046A43763}"
+}
+
 """
 	TEST
 """
@@ -30,6 +39,11 @@ def test():
     # Open DB file
     esedb_file = pyesedb.file()
     esedb_file.open(test_file)
+
+    numb_tables = esedb_file.get_number_of_tables()
+    print("Numb of tabbles: %d" % numb_tables)
+    for i in range(0,numb_tables):
+        print("TABLE %d is called %s" % (i, esedb_file.get_table(i).get_name()))
     esedb_file.close()
 
     return
