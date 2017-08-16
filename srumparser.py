@@ -2,12 +2,13 @@
 #  -*- coding:utf-8 -*-
 
 """
-	Parse SRUM database
+    Parse SRUM database
 
-	Author: David DURVAUX
-	Copyright: EC DIGIT CSIRC (European Commission) - February 2017
+    Author: David DURVAUX
+    Copyright: EC DIGIT CSIRC (European Commission) - February 2017
 """
 import os
+import csv
 import sys
 import time
 import argparse
@@ -37,7 +38,7 @@ column_id_mapping = { # map the column type
 }
 
 """
-	TEST
+    TEST
 """
 def test():
 
@@ -66,12 +67,21 @@ def test():
     numb_records = esedb_file.get_table(table_mapping_id[table_mapping["WIN_NET_DATA_USAGE"]]).get_number_of_records()
     print("NUMBER OF RECORDS IN WIN_NET_DATA_USAGE = %d" % numb_records)
 
+    columns = []
+    values = []
     # printing records
     for i in range(0, numb_records):
+
+        print("Parsing record %d  out of %d" % (i, numb_records))
+
         record = esedb_file.get_table(table_mapping_id[table_mapping["WIN_NET_DATA_USAGE"]]).get_record(i)
         numb_vals = record.get_number_of_values()
+        row = {}
+
         for j in range(0, numb_vals):
             col_name = esedb_file.get_table(table_mapping_id[table_mapping["WIN_NET_DATA_USAGE"]]).get_record(i).get_column_name(j)
+            if(i == 0): # only initialize list of columns once
+                columns.append(col_name)
             col_type = esedb_file.get_table(table_mapping_id[table_mapping["WIN_NET_DATA_USAGE"]]).get_record(i).get_column_type(j)
             long_val = esedb_file.get_table(table_mapping_id[table_mapping["WIN_NET_DATA_USAGE"]]).get_record(i).is_long_value(j)
             multi_val = esedb_file.get_table(table_mapping_id[table_mapping["WIN_NET_DATA_USAGE"]]).get_record(i).is_multi_value(j)
@@ -87,13 +97,13 @@ def test():
             else:
                 col_value_data = col_value_data.encode('hex')
 
-            print("Col name: %s Type: %s Value: %s (long: %s / multi: %s)" % (col_name, col_type, col_value_data, long_val, multi_val))
-
-        break # just print single result
+            #print("Col name: %s Type: %s Value: %s (long: %s / multi: %s)" % (col_name, col_type, col_value_data, long_val, multi_val))
+            row[col_name] = col_value_data
+        values.append(row)
 
     # close connection and return
     esedb_file.close()
-    return
+    return (columns, values)
 
 # --------------------------------------------------------------------------- #
 
@@ -104,26 +114,30 @@ def __get_data_from_table(table):
     Main function
 """
 def main():
-	# Parse command line arguments
-	parser = argparse.ArgumentParser()
-	parser.add_argument('-d', '--database', action='store', dest='database', help='Path to SRUM database.  By default, C:\\Windows\\System32\\sru\\SRUDB.dat')
-	#parser.add_argument('-H', '--history', action='store', dest='history', help='Path to JSON history file.  By default, ./history.json', default='./history.json')
+    # Parse command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--database', action='store', dest='database', help='Path to SRUM database.  By default, C:\\Windows\\System32\\sru\\SRUDB.dat')
+    #parser.add_argument('-H', '--history', action='store', dest='history', help='Path to JSON history file.  By default, ./history.json', default='./history.json')
 
-	# Parse arguments and configure the script
-	arguments = parser.parse_args()
-	if arguments.database:
-		if not os.path.isfile(arguments.database):
-			print("ERROR: %s has to be an existing file!" % arguments.database)
-			parser.print_help()
-			sys.exit(-1)
-		else:
-			print("DEBUG - do something")
+    # Parse arguments and configure the script
+    arguments = parser.parse_args()
+    if arguments.database:
+        if not os.path.isfile(arguments.database):
+            print("ERROR: %s has to be an existing file!" % arguments.database)
+            parser.print_help()
+            sys.exit(-1)
+        else:
+            print("DEBUG - do something")
 
-	# TEST
-	test()
+    # TEST
+    (columns, values) = test()
+    with open('test_data.csv', 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames = columns)
+        writer.writeheader()
+        writer.writerows(values)
 
-	# All done ;)
-	return
+    # All done ;)
+    return
 
 # --------------------------------------------------------------------------- #
 
